@@ -9,8 +9,7 @@ class VehiclesSeeder extends Seeder
 {
     public function run(): void
     {
-        // ĻOTI SVARĪGS LABOJUMS: Iztīrīt tabulu pirms jaunu datu ievietošanas
-        DB::table('vehicles')->truncate(); 
+        DB::table('vehicles')->truncate();
 
         $items = DatabaseSeeder::getData('vehicles');
         $now = now();
@@ -29,11 +28,11 @@ class VehiclesSeeder extends Seeder
             ];
         }
 
-       
+
         if (!empty($processedItems)) {
             DB::table('vehicles')->insert($processedItems);
         }
-        
+
         $this->command->info('Vehicles data seeded successfully.');
     }
 }

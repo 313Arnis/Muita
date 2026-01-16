@@ -10,7 +10,7 @@ class AuthUsersSeeder extends Seeder
 {
     public function run(): void
     {
-        // Read users from the shared info.json via DatabaseSeeder helper
+       
         $items = DatabaseSeeder::getData('users');
 
         if (empty($items)) {
@@ -18,7 +18,7 @@ class AuthUsersSeeder extends Seeder
             return;
         }
 
-        // We'll seed only a few demo auth users (first 6)
+       
         $toInsert = [];
         $now = now();
 
@@ -30,7 +30,6 @@ class AuthUsersSeeder extends Seeder
                 'username' => $username,
                 'full_name' => $item['full_name'] ?? null,
                 'email' => $email,
-                // Default password for seeded users: 'Password123!'
                 'password' => Hash::make('Password123!'),
                 'role' => $item['role'] ?? 'analyst',
                 'active' => $item['active'] ?? true,

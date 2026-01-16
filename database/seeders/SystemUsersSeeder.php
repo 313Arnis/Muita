@@ -9,10 +9,8 @@ class SystemUsersSeeder extends Seeder
 {
     public function run(): void
     {
-        // TRUNCATE: Iztīra tabulu
-        DB::table('system_users')->truncate(); 
-        
-        // JSON atslēga ir 'users', bet tabula ir 'system_users'
+        DB::table('system_users')->truncate();
+
         $items = DatabaseSeeder::getData('users');
         $now = now();
         $processedItems = [];

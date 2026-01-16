@@ -4,29 +4,27 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon; // Iekļaujam Carbon
+use Carbon\Carbon;
 
 class CasesSeeder extends Seeder
 {
     public function run(): void
     {
-        // Iztīra tabulu
-        DB::table('cases')->truncate(); 
+        DB::table('cases')->truncate();
 
         $items = DatabaseSeeder::getData('cases');
         $now = now();
         $processedItems = [];
 
         foreach ($items as $item) {
-            // Konvertējam ISO datumu uz MySQL DATETIME formātu
             $arrivalTimestamp = Carbon::parse($item['arrival_ts'])->format('Y-m-d H:i:s');
-            
+
             $processedItems[] = [
                 'external_id' => $item['id'],
                 'external_ref' => $item['external_ref'] ?? null,
-                'status' => $item['status'], // Tagad kā STRING
-                'priority' => $item['priority'], // Tagad kā STRING
-                'arrival_ts' => $arrivalTimestamp, 
+                'status' => $item['status'],
+                'priority' => $item['priority'],
+                'arrival_ts' => $arrivalTimestamp,
                 'checkpoint_id' => $item['checkpoint_id'],
                 'origin_country' => $item['origin_country'],
                 'destination_country' => $item['destination_country'],

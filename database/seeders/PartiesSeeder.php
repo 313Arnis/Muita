@@ -9,8 +9,7 @@ class PartiesSeeder extends Seeder
 {
     public function run(): void
     {
-        // TRUNCATE: Iztīra tabulu
-        DB::table('parties')->truncate(); 
+        DB::table('parties')->truncate();
 
         $items = DatabaseSeeder::getData('parties');
         $now = now();
@@ -19,7 +18,7 @@ class PartiesSeeder extends Seeder
         foreach ($items as $item) {
             $processedItems[] = [
                 'external_id' => $item['id'],
-                'type' => $item['type'] ?? 'company', 
+                'type' => $item['type'] ?? 'company',
                 'name' => $item['name'],
                 'reg_code' => $item['reg_code'] ?? null,
                 'vat' => $item['vat'] ?? null,

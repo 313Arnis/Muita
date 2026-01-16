@@ -7,15 +7,13 @@ use Illuminate\Support\Facades\File;
 
 class DatabaseSeeder extends Seeder
 {
-    // Šeit glabāsim ielādētos datus, lai nevajadzētu lasīt JSON atkārtoti.
+   
     protected static ?array $data = null;
 
-    /**
-     * Palaist datu sēšanas funkcijas.
-     */
+    
     public function run(): void
     {
-        // Palaist visus specifiskos seederus
+     
         $this->call([
             VehiclesSeeder::class,
             PartiesSeeder::class,
@@ -27,9 +25,7 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 
-    /**
-     * Palīgfunkcija, lai iegūtu datus no JSON.
-     */
+
     public static function getData(string $key): array
     {
         if (self::$data === null) {
