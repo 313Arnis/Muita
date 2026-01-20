@@ -11,15 +11,21 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $table = 'system_users';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
+        'external_id',
+        'username',
+        'full_name',
+        'role',
+        'active',
         'password',
+        'remember_token',
     ];
 
     /**
@@ -43,6 +49,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getAuthIdentifierName()
+    {
+        return 'username';
     }
     public function hasRole($role)
     {

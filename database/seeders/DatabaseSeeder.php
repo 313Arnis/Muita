@@ -7,18 +7,17 @@ use Illuminate\Support\Facades\File;
 
 class DatabaseSeeder extends Seeder
 {
-   
+
     protected static ?array $data = null;
 
-    
+
     public function run(): void
     {
-     
+
         $this->call([
             VehiclesSeeder::class,
             PartiesSeeder::class,
             SystemUsersSeeder::class,
-            AuthUsersSeeder::class,
             CasesSeeder::class,
             InspectionsSeeder::class,
             DocumentsSeeder::class,
