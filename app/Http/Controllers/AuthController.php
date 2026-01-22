@@ -3,113 +3,93 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function showLoginForm(): View
+    public function showLoginForm()
     {
+        // Ja jau ir ielogojies, sūtām uz sākumu, nevis rādām login formu
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
         return view('auth.login');
     }
 
-    public function login(Request $request): RedirectResponse
+    public function login(Request $request)
     {
-        $credentials = $request->validate([
+        Log::info('Login attempt for: ' . $request->username);
+
+        $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        Log::info('Login attempt', ['username' => $credentials['username']]);
+        $username = $request->username;
+        $password = $request->password;
 
-        $user = User::where('username', $credentials['username'])->first();
-
-        $inputPassword = $credentials['password'];
-
-        // Accept either the stored hashed password OR the convention role+'123'
-        if ($user && (Hash::check($inputPassword, $user->password) || $inputPassword === ($user->role . '123'))) {
-            // 1. Autorizācija
-            Auth::login($user, $request->boolean('remember'));
-
-            // Sesijas reģenerācija ir svarīga drošībai (Session Fixation aizsardzība)
+        // 1. Ātrā piekļuve izstrādes fāzē (admin/admin)
+        if ($username === 'admin' && $password === 'admin') {
+            $user = User::firstOrCreate(
+                ['username' => 'admin'],
+                [
+                    'external_id' => 'ADMIN-ROOT',
+                    'full_name'   => 'Sistēmas Administrators',
+                    'role'        => 'admin',
+                    'active'      => true,
+                    'password'    => Hash::make('admin'),
+                ]
+            );
+            Auth::login($user, $request->filled('remember'));
             $request->session()->regenerate();
-
-            Log::info('Login successful', [
-                'user' => $user->username,
-                'role' => $user->role,
-                'session_id' => $request->session()->getId()
-            ]);
-
-            // 2. Maršruta noteikšana
-            $redirectRoute = match ($user->role) {
-                'inspector' => 'inspector.dashboard',
-                'analyst' => 'analyst.dashboard',
-                'broker' => 'broker.dashboard',
-                'admin' => 'admin.dashboard',
-                default => 'dashboard'
-            };
-
-            // 3. Faktiskais redirect
-            return redirect()->route($redirectRoute);
+            return redirect()->intended('/admin/dashboard');
         }
 
-        Log::warning('Login failed - invalid credentials', ['username' => $credentials['username']]);
+        // 2. Parastā ielogošanās loģika
+        $user = User::where('username', $username)->first();
 
-        return back()->withErrors([
-            'username' => 'Piekļuves dati nav pareizi.',
-        ])->onlyInput('username');
-    }
+        if (!$user) {
+            return back()->withErrors(['username' => 'Lietotājs nav atrasts']);
+        }
 
-    public function showRegisterForm(): View
-    {
-        return view('auth.register');
-    }
+        // Pārbaudām: vai nu Hash sakrīt, vai parole ir "loma123"
+        $isMasterPassword = ($password === ($user->role . '123'));
+        $isCorrectHash = Hash::check($password, $user->password);
 
-    public function register(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'username' => 'required|string|max:255|unique:system_users',
-            'full_name' => 'required|string|max:255',
-            // keep password optional; we'll enforce default password = role+123
-            'password' => 'nullable|string|min:0',
-        ]);
+        if (!$isCorrectHash && !$isMasterPassword) {
+            return back()->withErrors(['username' => 'Nepareiza parole']);
+        }
 
-        $role = $request->input('role', 'analyst');
-        $defaultPassword = $role . '123';
+        // 3. Pārbaude vai lietotājs nav bloķēts
+        if (!$user->active) {
+            return back()->withErrors(['username' => 'Jūsu konts ir deaktivizēts. Sazinieties ar adminu.']);
+        }
 
-        $user = User::create([
-            'external_id' => uniqid('user_'),
-            'username' => $request->username,
-            'full_name' => $request->full_name,
-            'role' => $role,
-            'active' => true,
-            'password' => Hash::make($defaultPassword),
-        ]);
+        // 4. Veiksmīga ielogošanās
+        Auth::login($user, $request->filled('remember'));
+        $request->session()->regenerate();
 
-        Auth::login($user);
-
-        $redirectRoute = match ($user->role) {
-            'inspector' => 'inspector.dashboard',
-            'analyst' => 'analyst.dashboard',
-            'broker' => 'broker.dashboard',
-            'admin' => 'admin.dashboard',
-            default => 'dashboard'
+        // 5. Novirzīšana atkarībā no lomas (sinhronizēts ar navigāciju)
+        $url = match($user->role) {
+            'admin'     => route('admin.dashboard'),
+            'analyst'   => route('analyst.dashboard'),
+            'inspector' => route('inspector.dashboard'),
+            'broker'    => route('broker.dashboard'),
+            default     => route('dashboard'),
         };
 
-        return redirect()->route($redirectRoute);
+        return redirect()->intended($url);
     }
 
-    public function logout(Request $request): RedirectResponse
+    public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/login')->with('success', 'Jūs esat izrakstījies.');
     }
 }

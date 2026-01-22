@@ -4,32 +4,29 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Importēta Auth fasāde
-use Illuminate\Support\Facades\Log;  // SALABOTS: Importēta Log fasāde
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string  ...$roles
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    public function handle(Request $request, Closure $next, ...$roles)
     {
+        // Ja nav ielogojies, sūtām uz login lapu
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        // Iegūstam lietotāju caur $request objektu
-        $user = $request->user();
+        // Dabūjam lietotāju caur Auth fasādi (drošāk nekā $request->user())
+        $user = Auth::user();
 
-        // Pārbaudām lomu
+        // Pārbaudām, vai lietotāja loma ir atļauto sarakstā
         if ($user && !in_array($user->role, $roles)) {
-            abort(403, 'Unauthorized. Tev nav nepieciešamās lomas: ' . implode(', ', $roles));
+            
+            // Ielogojam kļūdu, lai administrators redz, ka kāds mēģina "līst kur nevajag"
+            Log::warning("Access denied for user {$user->username}. Required roles: " . implode(', ', $roles));
+
+            // Metam 403 kļūdu ar saprotamu tekstu
+            abort(403, 'Piekļuve liegta. Šī sadaļa nav paredzēta tavam lietotāja līmenim.');
         }
 
         return $next($request);

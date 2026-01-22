@@ -14,13 +14,22 @@ class Inspection extends Model
         'start_ts',
         'location',
         'checks',
-        'assigned_to'
+        'assigned_to',
+        'decision',
+        'decision_by',
+        'decision_notes',
+        'decision_ts'
     ];
 
     protected $casts = [
         'checks' => 'array',
         'start_ts' => 'datetime'
     ];
+
+    public function inspector()
+    {
+        return $this->belongsTo(User::class, 'assigned_to', 'username');
+    }
 
     public function customsCase()
     {

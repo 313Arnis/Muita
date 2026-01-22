@@ -1,131 +1,65 @@
 <!DOCTYPE html>
 <html lang="lv">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pierakstīties - Muitas CRM</title>
-
-    <!-- Bootstrap CSS -->
+    <title>Muitas CRM - Ieiet</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
-        body {
-            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .login-header {
-            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-        }
-
-        .login-body {
-            padding: 30px 20px;
-        }
-
-        .form-control:focus {
-            border-color: #1a73e8;
-            box-shadow: 0 0 0 0.2rem rgba(26, 115, 232, 0.25);
-        }
-
-        .btn-customs {
-            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: transform 0.2s ease;
-        }
-
-        .btn-customs:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(135deg, #0d47a1 0%, #1a73e8 100%);
-        }
+        body { background: #f0f2f5; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { width: 100%; max-width: 400px; border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .header-blue { background: #1a73e8; color: white; border-radius: 12px 12px 0 0; padding: 30px; text-align: center; }
+        .btn-primary { background: #1a73e8; border: none; padding: 12px; border-radius: 8px; font-weight: 600; }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="login-card">
-                    <div class="login-header">
-                        <i class="fas fa-customs fa-3x mb-3"></i>
-                        <h3>Muitas CRM</h3>
-                        <p>Pierakstīties sistēmā</p>
-                    </div>
-                    <div class="login-body">
-                        <form method="POST" action="{{ route('login.post') }}">
-                            @csrf
 
-                            <div class="mb-3">
-                                <label for="username" class="form-label">
-                                    <i class="fas fa-user"></i> Lietotājvārds
-                                </label>
-                                <input type="text" class="form-control @error('username') is-invalid @enderror"
-                                    id="username" name="username" value="{{ old('username') }}" required autofocus>
-                                @error('username')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+<div class="login-card card">
+    <div class="header-blue">
+        <i class="fas fa-shield-halved fa-3x mb-3"></i>
+        <h3>{{ \App\Models\Setting::get('system_name', 'Muitas CRM') }}</h3>
+    </div>
+    
+    <div class="card-body p-4">
+        <form method="POST" action="{{ route('login.post') }}">
+            @csrf
 
-                            <div class="mb-3">
-                                <label for="password" class="form-label">
-                                    <i class="fas fa-lock"></i> Parole
-                                </label>
-                                <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                    id="password" name="password" required>
-                                @error('password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            @if($errors->any())
+                <div class="alert alert-danger py-2 small">Nepareizi piekļuves dati.</div>
+            @endif
 
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                                <label class="form-check-label" for="remember">
-                                    Atcerēties mani
-                                </label>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-customs text-white">
-                                    <i class="fas fa-sign-in-alt"></i> Pierakstīties
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="text-center mt-3">
-                            <p class="mb-0">Nav konta?
-                                <a href="{{ route('register') }}" class="text-decoration-none">
-                                    Reģistrēties
-                                </a>
-                            </p>
-                        </div>
-                    </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-muted">Lietotājvārds</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fas fa-user"></i></span>
+                    <input type="text" name="username" class="form-control bg-light border-start-0" value="{{ old('username') }}" required autofocus>
                 </div>
             </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-muted">Parole</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fas fa-lock"></i></span>
+                    <input type="password" name="password" class="form-control bg-light border-start-0" required>
+                </div>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                <label class="form-check-label small" for="remember">Atcerēties mani</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                IEIET SISTĒMĀ
+            </button>
+        </form>
+
+        <div class="mt-4 p-2 bg-light rounded text-center small border">
+            <span class="text-muted">Testa piekļuve:</span> <strong>admin / admin</strong>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
