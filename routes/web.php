@@ -14,7 +14,7 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// 2. Autentifikācija
+// 2. Autentifikācija (Visiem)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -25,10 +25,15 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // 3. Autentificēto lietotāju kopīgie maršruti
 Route::middleware(['auth'])->group(function () {
 
-    // Galvenais ieejas punkts
+    // Galvenais ieejas punkts (Dashboard)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Kopīgā lietu apskate
+    // TIEŠAIS MARŠRUTS UZ LOG VIEWER (Lai strādātu http://127.0.0.1:8000/log-viewer)
+    Route::get('/log-viewer', [AdminController::class, 'logViewer'])
+        ->name('admin.log-viewer')
+        ->middleware('role:admin');
+
+    // Kopīgā lietu apskate (Pieejama visām lomām)
     Route::get('/case/{external_id}', [DashboardController::class, 'show'])
         ->name('case.show')
         ->middleware('role:admin,analyst,broker,inspector');
@@ -56,17 +61,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/monitoring', [AnalystController::class, 'monitoring'])->name('monitoring');
     });
 
-    // --- BROKERA SADAĻA (Saskaņots ar taviem Blade skatiem) ---
+    // --- BROKERA SADAĻA ---
     Route::middleware(['role:broker'])->prefix('broker')->name('broker.')->group(function () {
         Route::get('/dashboard', [BrokerController::class, 'index'])->name('dashboard');
         Route::get('/declarations', [BrokerController::class, 'declarations'])->name('declarations');
-        
-        // Svarīgi: Šie nosaukumi sakrīt ar {{ route('broker.create-declaration') }}
         Route::get('/declarations/create', [BrokerController::class, 'createDeclaration'])->name('create-declaration');
         Route::post('/declarations/store', [BrokerController::class, 'storeDeclaration'])->name('store-declaration');
-        
-        Route::post('/submit-document', [BrokerController::class, 'submitDocument'])->name('submit-document');
         Route::get('/documents', [BrokerController::class, 'documents'])->name('documents');
+        Route::post('/submit-document', [BrokerController::class, 'submitDocument'])->name('submit-document');
     });
 
     // --- ADMINA SADAĻA ---

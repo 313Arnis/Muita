@@ -75,7 +75,7 @@ class AnalystController extends Controller
             
             $trend[] = [
                 'date' => $date->format('d.m'),
-                // IZLABOTS: Šeit arī noņemts json_decode
+              
                 'high' => $dayCases->filter(fn($c) => count($c->risk_flags ?? []) >= 3)->count(),
                 'total' => $dayCases->count()
             ];
@@ -97,7 +97,7 @@ class AnalystController extends Controller
         ];
     }
 
-    // --- PALĪGMETODES ---
+  
 
     private function getActivityLog()
     {

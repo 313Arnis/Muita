@@ -12,7 +12,7 @@ class AdminController extends Controller
 {
     public function __construct()
     {
-        // Pārliecinies, ka 'role' middleware tiešām eksistē Kernel.php
+        
         $this->middleware(['auth', 'role:admin']);
     }
 
@@ -26,7 +26,7 @@ class AdminController extends Controller
 
     public function users()
     {
-        // Pievienojam pagination, lai lapa "neuzkaras", ja būs 1000 lietotāji
+      
         $users = User::orderBy('created_at', 'desc')->paginate(15);
         return view('admin.users', compact('users'));
     }
@@ -91,7 +91,7 @@ class AdminController extends Controller
             'active' => 'required|boolean',
         ]);
 
-        // JAUNA LOĢIKA: Ja loma mainās, nomainām arī paroli uz jauno role123
+       
         if ($u->role !== $request->role) {
             $u->password = Hash::make($request->role . '123');
         }
@@ -107,7 +107,7 @@ class AdminController extends Controller
     {
         $targetUser = User::findOrFail($id);
         
-        // Pārbaude: Neļaut dzēst sevi
+
         if (Auth::id() == $targetUser->id) {
             return back()->with('error', 'Jūs nevarat dzēst savu kontu!');
         }
@@ -115,4 +115,11 @@ class AdminController extends Controller
         $targetUser->delete();
         return back()->with('success', 'Lietotājs dzēsts.');
     }
+    public function logViewer()
+{
+ 
+    $logs = \App\Models\ActivityLog::latest()->paginate(50);
+    
+    return view('admin.log-viewer', compact('logs'));
+}
 }
